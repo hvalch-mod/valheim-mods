@@ -1,0 +1,55 @@
+<Project>
+  <!-- Machine paths. Override in Environment.props (gitignored) if they differ. -->
+  <Import Project="$(MSBuildThisFileDirectory)Environment.props" Condition="Exists('$(MSBuildThisFileDirectory)Environment.props')" />
+
+  <PropertyGroup>
+    <ValheimDir Condition="'$(ValheimDir)' == ''">/home/games/steamapps/common/Valheim</ValheimDir>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/valheim/profiles/Server</ProfileDir>
+    <ManagedDir>$(ValheimDir)/valheim_Data/Managed</ManagedDir>
+    <BepInExDir>$(ProfileDir)/BepInEx</BepInExDir>
+    <PluginsDir>$(BepInExDir)/plugins</PluginsDir>
+    <!-- Set false to build without copying into the Gale profile. -->
+    <DeployToProfile Condition="'$(DeployToProfile)' == ''">true</DeployToProfile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Unity/Harmony refs target net4x; silence mismatch noise. -->
+    <NoWarn>$(NoWarn);MSB3277;CS0436</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Strips access modifiers from game assemblies at build time so private members are usable directly. -->
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(BepInExDir)/core/BepInEx.dll" Private="false" />
+    <Reference Include="$(BepInExDir)/core/0Harmony.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/assembly_valheim.dll" Private="false" Publicize="true" />
+    <Reference Include="$(ManagedDir)/assembly_utils.dll" Private="false" Publicize="true" />
+    <Reference Include="$(ManagedDir)/assembly_guiutils.dll" Private="false" Publicize="true" />
+    <Reference Include="$(ManagedDir)/UnityEngine.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.AnimationModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.AssetBundleModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)/Unity.TextMeshPro.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Opt in per project with <UseJotunn>true</UseJotunn>. -->
+  <ItemGroup Condition="'$(UseJotunn)' == 'true'">
+    <Reference Include="$(PluginsDir)/ValheimModding-Jotunn/Jotunn.dll" Private="false" />
+  </ItemGroup>
+</Project>
