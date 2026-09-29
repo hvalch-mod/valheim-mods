@@ -6,7 +6,7 @@ BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed str
 
 | Mod | Version | What it does |
 |---|---|---|
-| [Footloose](src/Footloose/README.md) | 0.1.0 | Walk through small plants; step over logs and low rocks without jumping. |
+| [Unhindered](src/Unhindered/README.md) | 0.1.0 | Walk through small plants; step over logs and low rocks without jumping. |
 
 `src/ExampleMod` is a reference sample, not released.
 
@@ -73,7 +73,7 @@ Each mod is versioned on its own. To release `<Mod>`:
 1. Bump `<Version>` in `src/<Mod>/<Mod>.csproj` and `Plugin.Version` (semver; they must match).
 2. Add an entry to `src/<Mod>/CHANGELOG.md` and update the version in the table above.
 3. `scripts/package.sh <Mod>` → `dist/hvalch-<Mod>-<Version>.zip` (manifest, README, CHANGELOG, icon, dll).
-4. Commit, then tag `<Mod>-v<Version>` (e.g. `Footloose-v0.1.0`).
+4. Commit, then tag `<Mod>-v<Version>` (e.g. `Unhindered-v0.1.0`).
 5. Install it: Gale → Import → Local mod → the zip. Or upload the zip to Thunderstore.
 
 Gale only lists mods it installed. The copy `dotnet build` drops into the profile still loads, but it doesn't appear in Gale.

@@ -5,7 +5,7 @@ using HarmonyLib;
 using Jotunn;
 using Jotunn.Utils;
 
-namespace Footloose
+namespace Unhindered
 {
     // Client-side mod. Optional on the server: if the server has it, its admin-only settings are
     // pushed to clients (and locked for non-admins); if not, each client uses its own config.
@@ -16,8 +16,8 @@ namespace Footloose
     [SynchronizationMode(AdminOnlyStrictness.IfOnServer)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string Guid = "hvalch.Footloose";
-        public const string Name = "Footloose";
+        public const string Guid = "hvalch.Unhindered";
+        public const string Name = "Unhindered";
         public const string Version = "0.1.0";
 
         internal static ManualLogSource Log;
@@ -32,9 +32,12 @@ namespace Footloose
 
         // Step-up: walk over low obstacles (logs, rocks) without jumping.
         internal static ConfigEntry<bool> StepUpEnabled;
-        internal static ConfigEntry<float> StepUpMaxHeight;
+        internal static ConfigEntry<float> StepUpMaxHeightWalk;
+        internal static ConfigEntry<float> StepUpMaxHeightJog;
+        internal static ConfigEntry<float> StepUpMaxHeightSprint;
         internal static ConfigEntry<float> StepUpSpeed;
         internal static ConfigEntry<bool> StepUpOnTerrain;
+        internal static ConfigEntry<bool> StepUpDebug;
 
         private readonly Harmony _harmony = new Harmony(Guid);
 
@@ -61,12 +64,22 @@ namespace Footloose
             const string su = "2 - Step Up";
             StepUpEnabled = BindSynced(su, "Enabled", true,
                 "Automatically step up onto low obstacles (logs, rocks, ledges) while moving, instead of having to jump.");
-            StepUpMaxHeight = BindSynced(su, "MaxHeight", 0.7f,
-                "Tallest obstacle (meters) you can step onto.", new AcceptableValueRange<float>(0.1f, 1.5f));
-            StepUpSpeed = BindSynced(su, "Speed", 4f,
-                "How fast you rise when stepping up (m/s).", new AcceptableValueRange<float>(1f, 10f));
+            StepUpMaxHeightWalk = BindSynced(su, "MaxHeightWalk", 0.7f,
+                "Tallest obstacle (meters) you can step onto while walking, crouching or encumbered. 0 = never step up.",
+                new AcceptableValueRange<float>(0f, 2f));
+            StepUpMaxHeightJog = BindSynced(su, "MaxHeightJog", 1.2f,
+                "Tallest obstacle (meters) you can step onto at normal running speed. 0 = never step up.",
+                new AcceptableValueRange<float>(0f, 2f));
+            StepUpMaxHeightSprint = BindSynced(su, "MaxHeightSprint", 1.5f,
+                "Tallest obstacle (meters) you can step onto while sprinting. 0 = never step up.",
+                new AcceptableValueRange<float>(0f, 2f));
+            StepUpSpeed = BindSynced(su, "Speed", 6f,
+                "How fast you rise when stepping up (m/s). Higher is snappier; 20 is near-instant.",
+                new AcceptableValueRange<float>(1f, 20f));
             StepUpOnTerrain = BindSynced(su, "StepOnTerrain", false,
                 "Also step up terrain ledges (e.g. hoe-raised ground). Off by default so natural cliffs still need a jump.");
+            StepUpDebug = Config.Bind(su, "DebugLog", false,
+                "Log why each obstacle you walk into is or isn't stepped onto (to LogOutput.log). Local only, never synced.");
 
             // In-game config manager edits and server sync re-apply live.
             Config.SettingChanged += (_, e) =>

@@ -4,7 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
-namespace Footloose
+namespace Unhindered
 {
     // Small vegetation: exclude character layers from its colliders' contacts. Only physics contacts
     // are affected; raycasts and overlap queries (interacting, melee hits, building) still see it.

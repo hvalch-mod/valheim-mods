@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleMod", "src\ExampleMod\ExampleMod.csproj", "{241D53ED-D786-455F-9C42-081F7B1212A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footloose", "src\Footloose\Footloose.csproj", "{046C24BE-D371-4194-979C-282A09BA32B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unhindered", "src\Unhindered\Unhindered.csproj", "{046C24BE-D371-4194-979C-282A09BA32B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
