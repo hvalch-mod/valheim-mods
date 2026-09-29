@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Footloose</AssemblyName>
+    <RootNamespace>Footloose</RootNamespace>
+    <Version>0.1.0</Version>
+    <UseJotunn>true</UseJotunn>
+  </PropertyGroup>
+</Project>
