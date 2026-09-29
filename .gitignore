@@ -6,3 +6,7 @@ obj/
 Environment.props
 dist/
 decompiled/
+
+# Local agent instructions (mention private infra); never publish
+AGENTS.md
+CLAUDE.md
