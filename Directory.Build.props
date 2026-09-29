@@ -3,6 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)Environment.props" Condition="Exists('$(MSBuildThisFileDirectory)Environment.props')" />
 
   <PropertyGroup>
+    <Author Condition="'$(Author)' == ''">hvalch</Author>
     <ValheimDir Condition="'$(ValheimDir)' == ''">/home/games/steamapps/common/Valheim</ValheimDir>
     <ProfileDir Condition="'$(ProfileDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/valheim/profiles/Server</ProfileDir>
     <ManagedDir>$(ValheimDir)/valheim_Data/Managed</ManagedDir>

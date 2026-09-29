@@ -9,7 +9,8 @@ dir="src/$name"
 [[ -e "$dir" ]] && { echo "$dir exists" >&2; exit 1; }
 mkdir -p "$dir"
 
-guid="hvalch.$(tr '[:upper:]' '[:lower:]' <<<"$name")"
+author="$(grep -oP "<Author[^>]*>\K[^<]+" Directory.Build.props)"
+guid="$author.$name"
 use_jotunn=""
 jotunn_using=""
 jotunn_attr=""

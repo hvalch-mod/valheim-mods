@@ -10,7 +10,7 @@ namespace ExampleMod
     [BepInProcess("valheim_server.x86_64")]
     public class Plugin : BaseUnityPlugin
     {
-        public const string Guid = "hvalch.examplemod";
+        public const string Guid = "hvalch.ExampleMod";
         public const string Name = "ExampleMod";
         public const string Version = "0.1.0";
 

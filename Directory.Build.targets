@@ -1,8 +1,8 @@
 <Project>
-  <!-- Copy built plugin into the Gale profile: BepInEx/plugins/<AssemblyName>/ -->
+  <!-- Copy built plugin into the Gale profile: BepInEx/plugins/<Author>-<AssemblyName>/ -->
   <Target Name="DeployToProfile" AfterTargets="Build" Condition="'$(DeployToProfile)' == 'true'">
     <PropertyGroup>
-      <DeployDir>$(PluginsDir)/$(AssemblyName)</DeployDir>
+      <DeployDir>$(PluginsDir)/$(Author)-$(AssemblyName)</DeployDir>
     </PropertyGroup>
     <Copy SourceFiles="$(TargetPath);$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
     <Message Importance="high" Text="Deployed $(AssemblyName) -> $(DeployDir)" />
