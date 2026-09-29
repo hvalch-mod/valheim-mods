@@ -60,5 +60,45 @@ namespace $name
 }
 CS
 
+# Release files for scripts/package.sh. version_number is stamped from the csproj at package time.
+deps='"denikson-BepInExPack_Valheim-5.4.2351"'
+if [[ -n "$use_jotunn" ]]; then
+  plugins="$(grep -oP "<ProfileDir[^>]*>\K[^<]+" Directory.Build.props | sed "s|\$(HOME)|$HOME|")/BepInEx/plugins"
+  jv="$(jq -r .version_number "$plugins/ValheimModding-Jotunn/manifest.json" 2>/dev/null || echo 2.30.2)"
+  deps+=$',\n    "ValheimModding-Jotunn-'"$jv"'"'
+fi
+cat > "$dir/manifest.json" <<JSON
+{
+  "name": "$name",
+  "version_number": "0.0.0",
+  "website_url": "",
+  "description": "TODO: one sentence, max 250 characters.",
+  "dependencies": [
+    $deps
+  ]
+}
+JSON
+
+cat > "$dir/README.md" <<MD
+# $name
+
+TODO: what it does, config, multiplayer notes.
+MD
+
+cat > "$dir/CHANGELOG.md" <<MD
+# Changelog
+
+## 0.1.0
+
+- Initial release.
+MD
+
+if command -v magick >/dev/null; then
+  magick -size 256x256 gradient:'#2e5e3a-#8fbf6a' -gravity center -fill white \
+    -font DejaVu-Sans-Bold -pointsize 36 -annotate 0 "$name" -depth 8 "$dir/icon.png"
+else
+  echo "magick not found: add a 256x256 $dir/icon.png before packaging" >&2
+fi
+
 dotnet sln ValheimMods.sln add "$dir/$name.csproj"
 echo "Created $dir"

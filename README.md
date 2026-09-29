@@ -2,12 +2,21 @@
 
 BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed straight into the Gale `Server` profile.
 
+## Mods
+
+| Mod | Version | What it does |
+|---|---|---|
+| [Footloose](src/Footloose/README.md) | 0.1.0 | Walk through small plants; step over logs and low rocks without jumping. |
+
+`src/ExampleMod` is a reference sample, not released.
+
 ## Layout
 
 - `Directory.Build.props` — paths + references shared by every mod (BepInEx, Harmony, game + Unity assemblies). Game assemblies are **publicized** at build time, so private members (`Player.Awake`, `m_staminaRegen`, ...) compile directly.
 - `Directory.Build.targets` — after build, copies `<Mod>.dll` + `.pdb` to `profiles/Server/BepInEx/plugins/<Author>-<Mod>/`.
 - `src/<Mod>/` — one project per mod.
 - `scripts/new-mod.sh <Name> [--jotunn]` — scaffold a new mod and add it to the solution.
+- `scripts/package.sh [Mod ...]` — build Thunderstore zips into `dist/` (all mods if no args).
 - `scripts/decompile.sh [assembly ...]` — decompile game code into `decompiled/` (gitignored). Re-run after game updates.
 
 ## Naming
@@ -55,8 +64,16 @@ Anything deployed into the profile goes to the dedicated server on the next serv
 - **Harmony** patches game methods at runtime: `[HarmonyPatch(typeof(Player), nameof(Player.Awake))]` + `Prefix`/`Postfix`/`Transpiler`. `__instance`, `__result`, `___privateField` are magic parameter names.
 - **Game code** lives in `valheim_Data/Managed/assembly_valheim.dll`. Run `scripts/decompile.sh`, then grep `decompiled/assembly_valheim/` (one file per class) to find what to patch. Key classes: `Player`, `Character`, `Humanoid`, `ZNet`/`ZDO`/`ZRoutedRpc` (networking), `ObjectDB` (items/recipes), `ZNetScene` (prefabs), `Piece`, `Container`.
 - **Jotunn** (`--jotunn`) is the modding library for adding content — items, pieces, recipes, localization, config sync, commands. Add `[BepInDependency(Jotunn.Main.ModGuid)]`. Docs: https://valheim-modding.github.io/Jotunn/
-- **Multiplayer**: logic that must be authoritative runs on the server (`ZNet.instance.IsServer()`). If clients need the mod too, set `[NetworkCompatibility]` (Jotunn) so version mismatch blocks joining.
+- **Multiplayer**: logic that must be authoritative runs on the server (`ZNet.instance.IsServer()`). Default for these mods: client-side, with config synced from the server when it has the mod (Jotunn admin-only entries).
 
-## Publishing (later)
+## Releasing
 
-Thunderstore zip = `manifest.json` + `icon.png` (256x256) + `README.md` + the dll, at zip root.
+Each mod is versioned on its own. To release `<Mod>`:
+
+1. Bump `<Version>` in `src/<Mod>/<Mod>.csproj` and `Plugin.Version` (semver; they must match).
+2. Add an entry to `src/<Mod>/CHANGELOG.md` and update the version in the table above.
+3. `scripts/package.sh <Mod>` → `dist/hvalch-<Mod>-<Version>.zip` (manifest, README, CHANGELOG, icon, dll).
+4. Commit, then tag `<Mod>-v<Version>` (e.g. `Footloose-v0.1.0`).
+5. Install it: Gale → Import → Local mod → the zip. Or upload the zip to Thunderstore.
+
+Gale only lists mods it installed. The copy `dotnet build` drops into the profile still loads, but it doesn't appear in Gale.
