@@ -2,7 +2,7 @@
 # Usage: scripts/package.sh [ModName ...]   (no args: every src/<Mod>/ that has a manifest.json)
 # Builds each mod and zips it as a Thunderstore package: dist/<Author>-<ModName>-<Version>.zip
 # Needs in src/<ModName>/: manifest.json (version_number is stamped from the csproj), README.md,
-# icon.png (256x256), and optionally CHANGELOG.md.
+# icon.png (256x256), and optionally CHANGELOG.md. The repo's LICENSE is included; a src/<ModName>/LICENSE overrides it.
 # Import the zip in Gale (Import > Local mod) so Gale lists and manages it. Thunderstore takes the same zip.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -32,6 +32,12 @@ package() {
   if [[ -f "$dir/CHANGELOG.md" ]]; then
     cp "$dir/CHANGELOG.md" "$stage/"
     files+=(CHANGELOG.md)
+  fi
+  local license="LICENSE"
+  [[ -f "$dir/LICENSE" ]] && license="$dir/LICENSE"
+  if [[ -f "$license" ]]; then
+    cp "$license" "$stage/LICENSE"
+    files+=(LICENSE)
   fi
 
   mkdir -p dist
