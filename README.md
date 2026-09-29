@@ -81,3 +81,7 @@ Gale only lists mods it installed. The copy `dotnet build` drops into the profil
 ## License
 
 MIT. See [LICENSE](LICENSE). Use, change and share freely; keep the copyright notice.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Use, change and share freely; keep the copyright notice.
