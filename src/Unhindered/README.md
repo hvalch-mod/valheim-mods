@@ -17,3 +17,7 @@ Client-side. Works on servers without it. If the server has it, the server's set
 ## Config
 
 `BepInEx/config/hvalch.Unhindered.cfg`, or in-game with a configuration manager (F1).
+
+## Source
+
+MIT-licensed, on [GitHub](https://github.com/hvalch-mod/valheim-mods). This mod was written with AI assistance (Claude).
