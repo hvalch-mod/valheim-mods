@@ -77,3 +77,7 @@ Each mod is versioned on its own. To release `<Mod>`:
 5. Install it: Gale → Import → Local mod → the zip. Or upload the zip to Thunderstore.
 
 Gale only lists mods it installed. The copy `dotnet build` drops into the profile still loads, but it doesn't appear in Gale.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Use, change and share freely; keep the copyright notice.
