@@ -2,7 +2,7 @@
   "name": "Unhindered",
   "version_number": "0.0.0",
   "website_url": "https://github.com/hvalch-mod/valheim-mods",
-  "description": "Walk through small plants and step over logs and low rocks without jumping. Client-side; syncs config from servers that have it.",
+  "description": "Walk through small plants and step over logs and low rocks without jumping.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2351",
     "ValheimModding-Jotunn-2.30.2"
