@@ -1,26 +1,46 @@
 # Feint
 
-Cancel your attacks mid-swing by blocking or dodging, for a stamina price.
+Changed your mind mid-swing? Block or dodge to cancel the attack before it lands, at a stamina cost.
 
-## Features
+I got sick of trolls killing me because I got greedy with a combo and couldn't back out of it. I'll still die, but now I have a bit more control. I didn't want that control for free, though. Other mods already let you cancel attacks (AttackCancel, for one), but I wanted cancelling to come with tradeoffs.
 
-- **Cancel with block or dodge:** press block or dodge during an attack, before it hits, to cancel it. Each can be turned off separately (`CancelWithBlock` / `CancelWithDodge`).
-- **Cancel delay:** the block or dodge starts after half the time the swing had been going (cancel 0.4 s into a swing, block or dodge 0.2 s later). The swing keeps going until then. If it reaches its hit in that time, the hit still lands, but weaker the longer you had been pulling back: from full damage right after the cancel down to half (`CancelledHitDamage`) just before the block or dodge. `ScaleCancelledHitDamage = false` makes it a flat `CancelledHitDamage`. If the swing's animation would have ended sooner, the block or dodge starts then instead, with no stamina penalty.
-- **Stamina penalty:** a cancel costs extra stamina, up to the attack's own stamina cost by default (`StaminaPenalty`, 0 to 3 times), charged when the block or dodge starts. With `ScaleStaminaPenalty` it depends on when you cancel: nothing at the very start of the swing, rising quickly to the full amount for the latest cancel that still stops the hit, then down to half for a cancel right at the hit. You need the full amount to cancel. A dodge-cancel also needs stamina for the dodge.
-- **No cancelling a hit:** once a swing reaches its hit moment it can't be cancelled, so blocking or dodging during the recovery works like vanilla and costs nothing extra. Attacks can't be cancelled in the air, and attacks listed in `NonCancellableAttacks` (the knife's jump attack by default) never can.
+## Video demo
+
+<video src="https://files.catbox.moe/1zblqy.mp4" controls muted loop></video>
+
+[Watch the video](https://files.catbox.moe/1zblqy.mp4) if it doesn't play above.
+
+## How it works
+
+- **Cancel:** press block or dodge during an attack, before it hits. Your block or dodge starts a moment later, after half as long as you'd been swinging. Cancel early and it's quick; cancel late and you're still committed.
+- **Late cancels can still hit:** if the swing reaches its hit during that moment, the hit lands, but weaker. The longer you'd been pulling back, the weaker it is (down to half damage by default).
+- **Stamina cost:** a cancel costs extra stamina, up to the attack's own cost. It's cheap right at the start of a swing and most expensive for the latest cancel that still stops the hit. You need the full amount to cancel at all. If the swing would have finished first anyway, it's free.
+- **Once it hits, it's committed:** after a swing's hit moment it can't be cancelled, so blocking or dodging during the recovery works like vanilla. No cancelling in the air, or the knife's jump attack.
 - **Combo reset:** a cancel resets your combo. The next swing starts from the first attack.
-- **Dodge key:** `DodgeKey` sets a dedicated dodge key. The game's own `AltDodge` control does the same thing.
+
+## Extra controls
+
+- **Dodge key:** `DodgeKey` sets a dedicated dodge key that dodges the way you're moving. (Same as the game's own `AltDodge` control.)
 - **Block + jump:** `BlockJump` sets what jump does while blocking: `Dodge` (vanilla), `Jump`, or `Nothing`.
-
-## Multiplayer
-
-Client-side. Works on servers without it. If the server has it, the server's cancel settings are used and locked for non-admins. Controls are always your own.
-
-<!-- TODO before upload: describe what other players see, once tested. -->
 
 ## Config
 
 `BepInEx/config/hvalch.Feint.cfg`, or in-game with a configuration manager (F1).
+
+| Setting | Default | What it does |
+|---|---|---|
+| `CancelWithBlock` / `CancelWithDodge` | on | Which inputs can cancel. |
+| `StaminaPenalty` | 1 | Extra stamina per cancel, as a multiple of the attack's cost (0 to 3). |
+| `ScaleStaminaPenalty` | on | Scale the cost by when you cancel. Off = always the full cost. |
+| `CancelledHitDamage` | 0.5 | Lowest damage multiplier for a cancelled swing that still hits. |
+| `ScaleCancelledHitDamage` | on | Weaker the longer you'd been pulling back. Off = always `CancelledHitDamage`. |
+| `NonCancellableAttacks` | knife jump attacks | Attack animations that can never be cancelled. `DebugLog` prints the name of each attack you cancel. |
+| `DodgeKey` | none | Dedicated dodge key. Local only. |
+| `BlockJump` | Dodge | What jump does while blocking. Local only. |
+
+## Multiplayer
+
+Client-side. Works on servers without it. If the server has it, the server's cancel settings are used and locked for non-admins. Controls are always your own.
 
 ## AI Disclaimer
 

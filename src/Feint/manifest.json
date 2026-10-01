@@ -2,7 +2,7 @@
   "name": "Feint",
   "version_number": "0.0.0",
   "website_url": "https://github.com/hvalch-mod/valheim-mods",
-  "description": "Cancel attacks mid-swing by blocking or dodging, at a stamina cost. Optional dedicated dodge key.",
+  "description": "Changed your mind mid-swing? Block or dodge to cancel the attack before it lands, at a stamina cost.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2351",
     "ValheimModding-Jotunn-2.30.2"

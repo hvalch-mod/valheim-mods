@@ -108,8 +108,9 @@ namespace Feint
 
             // The dodge is started by us after the delay, not by vanilla's queue.
             player.m_queuedDodgeTimer = 0f;
+            float progress = HitProgress.Get(player.m_animator);
             Debug($"cancelled {attack.m_attackAnimation} with {(dodge ? "dodge" : "block")}, " +
-                $"{elapsed:0.##}s into the swing ({HitProgress.Get(player.m_animator):P0} to the hit), delay {delay:0.##}s");
+                $"{elapsed:0.##}s into the swing ({progress:P0} to the hit), delay {delay:0.##}s");
 
             s_pendingPlayer = player;
             s_pendingAttack = attack;
@@ -119,7 +120,7 @@ namespace Feint
             s_pendingDodge = dodge;
             s_pendingDodgeDir = player.m_queuedDodgeDir;
             s_pendingPenalty = penalty;
-            s_pendingProgress = HitProgress.Get(player.m_animator);
+            s_pendingProgress = progress;
             s_pendingHit = false;
             // Started from Update, after SetControls has applied this frame's input.
             s_pendingAt = Time.time + delay;
@@ -266,8 +267,7 @@ namespace Feint
                     break;
                 }
             }
-            // TEST-LOG: remove before upload.
-            Plugin.Log.LogInfo("[test] dodge cancel: " +
+            Debug("dodge cancel: " +
                 (stuck ? "still in attack animation, falling back to cross-fade" : "trigger worked"));
 
             if (stuck)
@@ -345,6 +345,9 @@ namespace Feint
                 }
             }
 
+            // First: records the pre-swing state even when another mod's prefix replaces StartAttack
+            // (e.g. EpicLoot's Throwable), and holds back every new swing while a cancel is pending.
+            [HarmonyPriority(Priority.First)]
             private static bool Prefix(Humanoid __instance)
             {
                 if (__instance != Player.m_localPlayer)

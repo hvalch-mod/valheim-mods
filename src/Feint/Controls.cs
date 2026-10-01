@@ -52,6 +52,9 @@ namespace Feint
         [HarmonyPatch(typeof(Player), nameof(Player.SetControls))]
         private static class SetControlsPatch
         {
+            // Last: sees input other mods' prefixes changed (e.g. BetterArchery clears blockHold
+            // while zooming a bow), so that isn't taken as a block cancel.
+            [HarmonyPriority(Priority.Last)]
             private static void Prefix(Player __instance, bool block, bool blockHold, ref bool jump, ref bool dodge,
                 out bool __state)
             {
@@ -75,8 +78,8 @@ namespace Feint
                 }
 
                 // Vanilla: on keyboard (or the default gamepad layout), jump while blocking dodges.
-                bool keyboardPath = ZInput.InputLayout == InputLayout.Default || !ZInput.IsGamepadActive();
-                if (jump && !dodge && blocking && keyboardPath && Plugin.BlockJump.Value != BlockJumpAction.Dodge)
+                if (jump && !dodge && blocking && Plugin.BlockJump.Value != BlockJumpAction.Dodge &&
+                    (ZInput.InputLayout == InputLayout.Default || !ZInput.IsGamepadActive()))
                 {
                     jump = false;
                     __state = Plugin.BlockJump.Value == BlockJumpAction.Jump;
