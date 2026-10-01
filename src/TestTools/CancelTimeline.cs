@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TestTools
 {
     // On-screen timeline of the local player's last attack and its Feint cancel, drawn like the
-    // stamina bar. Shown from the start of an attack; hidden when the attack ends without a cancel;
-    // after a cancel it stays until the next attack starts.
+    // stamina bar. Shown from the start of an attack; hidden when the attack ends without a cancel
+    // or a refused cancel attempt; otherwise it stays until the next attack starts.
     //
     // Feint is read by reflection (its Cancel class is internal), so it's an optional dependency:
     // without it only the swing and its hit are shown.
@@ -17,6 +17,10 @@ namespace TestTools
         private static string s_attackName;
         private static float s_hitAt = -1f;
         private static float s_damageScale = -1f;
+        // When the swing's animation ended on its own (-1 = not yet, or cut short by a cancel).
+        private static float s_swingEndAt = -1f;
+        // First cancel attempt Feint refused (e.g. after the hit), -1 = none.
+        private static float s_refusedAt = -1f;
 
         private static bool s_cancelled;
         private static bool s_dodge;
@@ -44,6 +48,8 @@ namespace TestTools
         private static readonly Color HitColor = new Color(1f, 0.25f, 0.25f, 1f);
         private static readonly Color EstimatedHitColor = new Color(1f, 0.25f, 0.25f, 0.45f);
         private static readonly Color PeakColor = new Color(1f, 0.55f, 0.1f, 1f);
+        private static readonly Color RefusedColor = new Color(0.8f, 0.5f, 1f, 1f);
+        private static readonly Color PanelColor = new Color(0f, 0f, 0f, 0.55f);
 
         private static GUIStyle s_label;
 
@@ -85,10 +91,21 @@ namespace TestTools
                 postfix: postfix == null ? null : new HarmonyMethod(typeof(CancelTimeline), postfix));
         }
 
-        private static void TryCancelPostfix(bool __result, bool dodge)
+        private static void TryCancelPostfix(Player player, bool __result, bool dodge)
         {
-            if (!__result || !s_active)
+            if (!s_active || s_cancelled)
             {
+                return;
+            }
+            if (!__result)
+            {
+                // Feint also calls this for every block/dodge press outside attacks; only count presses
+                // during this swing.
+                if (s_refusedAt < 0f && s_swingEndAt < 0f && player.InAttack())
+                {
+                    s_refusedAt = Time.time;
+                    s_dodge = dodge;
+                }
                 return;
             }
             s_cancelled = true;
@@ -142,6 +159,8 @@ namespace TestTools
                 s_swingEnded = false;
                 s_penaltyScale = -1f;
                 s_progress = -1f;
+                s_swingEndAt = -1f;
+                s_refusedAt = -1f;
             }
         }
 
@@ -166,14 +185,16 @@ namespace TestTools
 
         internal static void Update()
         {
-            if (!s_active || s_cancelled)
+            if (!s_active || s_cancelled || s_swingEndAt >= 0f)
             {
                 return;
             }
             Player player = Player.m_localPlayer;
             if (player == null || (Time.time - s_start > 0.15f && !player.InAttack()))
             {
-                s_active = false;
+                s_swingEndAt = Time.time;
+                // Nothing to look at unless a cancel was tried.
+                s_active = player != null && s_refusedAt >= 0f;
             }
         }
 
@@ -197,7 +218,10 @@ namespace TestTools
             float windup = hit >= 0f ? hit : estimatedHit;
             float peak = windup > 0f ? windup * s_peakProgress : -1f;
 
-            float end = Mathf.Max(followUp >= 0f ? followUp : now, Mathf.Max(hit, estimatedHit));
+            float swingEnded = s_swingEndAt >= 0f ? s_swingEndAt - s_start : -1f;
+            float refused = s_refusedAt >= 0f ? s_refusedAt - s_start : -1f;
+            float last = followUp >= 0f ? followUp : swingEnded >= 0f ? swingEnded : now;
+            float end = Mathf.Max(last, Mathf.Max(hit, estimatedHit));
             float span = Mathf.Max(0.5f, end * 1.15f);
 
             float width = Screen.width * 0.4f;
@@ -206,8 +230,10 @@ namespace TestTools
             float y = Screen.height * 0.78f;
             float Px(float t) => x + width * Mathf.Clamp01(t / span);
 
+            // Panel behind everything: summary line, upper labels, bar, lower labels.
+            Fill(new Rect(x - 80f, y - 50f, width + 160f, height + 80f), PanelColor);
             Fill(new Rect(x - 2f, y - 2f, width + 4f, height + 4f), Background);
-            float swingEnd = s_cancelled ? cancel : now;
+            float swingEnd = s_cancelled ? cancel : swingEnded >= 0f ? swingEnded : now;
             Fill(new Rect(x, y, Px(swingEnd) - x, height), SwingColor);
             if (s_cancelled)
             {
@@ -231,6 +257,11 @@ namespace TestTools
             {
                 Tick(Px(cancel), y, height, Color.white, $"cancel {cancel:0.00}", below: false);
             }
+            if (refused >= 0f)
+            {
+                Tick(Px(refused), y, height, RefusedColor, $"{(s_dodge ? "dodge" : "block")} {refused:0.00}",
+                    below: false);
+            }
             if (followUp >= 0f)
             {
                 Tick(Px(followUp), y, height, s_dodge ? DodgeColor : BlockColor,
@@ -238,6 +269,15 @@ namespace TestTools
             }
 
             string summary = s_attackName;
+            if (!s_cancelled && refused >= 0f)
+            {
+                summary += $"  |  {(s_dodge ? "dodge" : "block")} at {refused:0.00}s refused" +
+                    (hit >= 0f && refused >= hit ? ": after the hit" : " (see Feint DebugLog)");
+                if (swingEnded >= 0f)
+                {
+                    summary += $"  |  swing ended {swingEnded:0.00}s";
+                }
+            }
             if (s_cancelled)
             {
                 summary += $"  |  cancel at {cancel:0.00}s";
@@ -262,7 +302,7 @@ namespace TestTools
                 }
             }
             GUI.color = Color.white;
-            GUI.Label(new Rect(x - 200f, y - 42f, width + 400f, 20f), summary, s_label);
+            GUI.Label(new Rect(x - 80f, y - 46f, width + 160f, 20f), summary, s_label);
         }
 
         private static void Tick(float px, float y, float height, Color color, string label, bool below)
