@@ -6,17 +6,27 @@ I got sick of trolls killing me because I got greedy with a combo and couldn't b
 
 ## Video demo
 
-<video src="https://files.catbox.moe/1zblqy.mp4" controls muted loop></video>
+<video src="https://files.catbox.moe/1zblqy.mp4" style="width: 100%; height: auto" controls muted loop></video>
 
 [Watch the video](https://files.catbox.moe/1zblqy.mp4) if it doesn't play above.
 
 ## How it works
 
-- **Cancel:** press block or dodge during an attack, before it hits. Your block or dodge starts a moment later, after half as long as you'd been swinging. Cancel early and it's quick; cancel late and you're still committed.
-- **Late cancels can still hit:** if the swing reaches its hit during that moment, the hit lands, but weaker. The longer you'd been pulling back, the weaker it is (down to half damage by default).
-- **Stamina cost:** a cancel costs extra stamina, up to the attack's own cost. It's cheap right at the start of a swing and most expensive for the latest cancel that still stops the hit. You need the full amount to cancel at all. If the swing would have finished first anyway, it's free.
-- **Once it hits, it's committed:** after a swing's hit moment it can't be cancelled, so blocking or dodging during the recovery works like vanilla. No cancelling in the air, or the knife's jump attack.
-- **Combo reset:** a cancel resets your combo. The next swing starts from the first attack.
+Press block or dodge during a swing, before it hits, to cancel it. The block or dodge doesn't start right away. The wait is half the time you had been swinging: if you cancel 0.4 seconds into a swing, the block or dodge starts 0.2 seconds later.
+
+![Timeline of an early and a late cancel](https://raw.githubusercontent.com/hvalch-mod/valheim-mods/main/src/Feint/docs/timeline.png)
+
+If the swing reaches its hit during that wait, the hit still lands, but weaker. The longer you had been waiting, the less damage it does, down to half by default.
+
+![Damage of a cancelled swing by when you cancel](https://raw.githubusercontent.com/hvalch-mod/valheim-mods/main/src/Feint/docs/damage.png)
+
+A cancel costs extra stamina, up to the swing's own stamina cost. How much depends on when you cancel. At the very start of a swing it's free. The cost rises quickly to the full amount for the latest cancel that still stops the hit, and is lower again for cancels so late that the hit lands anyway. You need the full amount of stamina to cancel. If the swing would have ended on its own before the block or dodge starts, there's no extra cost.
+
+![Extra stamina for a cancel by when you cancel](https://raw.githubusercontent.com/hvalch-mod/valheim-mods/main/src/Feint/docs/stamina.png)
+
+A cancel also resets your combo, so your next swing starts from the first attack.
+
+After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack.
 
 ## Extra controls
 

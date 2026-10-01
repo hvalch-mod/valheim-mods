@@ -4,7 +4,9 @@ Running around Valheim without snagging on every bush and log. This mod was prom
 
 ## Video demo
 
-https://files.catbox.moe/fjffa8.webm
+<video src="https://files.catbox.moe/fjffa8.webm" style="width: 100%; height: auto" controls muted loop></video>
+
+[Watch the video](https://files.catbox.moe/fjffa8.webm) if it doesn't play above.
 
 ## Features
 
