@@ -2,13 +2,11 @@
 
 Changed your mind mid-swing? Block or dodge to cancel the attack before it lands, at a stamina cost.
 
-I got sick of trolls killing me because I got greedy with a combo and couldn't back out of it. I'll still die, but now I have a bit more control. I didn't want that control for free, though. Other mods already let you cancel attacks (AttackCancel, for one), but I wanted cancelling to come with tradeoffs.
+I got sick of being one-shot because I got greedy with a combo and couldn't back out of it. I'll still die, but now I have a bit more control. I didn't want that control for free, though. Other mods already let you cancel attacks ([AttackCancel](https://thunderstore.io/c/valheim/p/MrGay/AttackCancel/), for one), but I wanted cancelling to come with tradeoffs.
 
 ## Video demo
 
-<video src="https://files.catbox.moe/1zblqy.mp4" style="width: 100%; height: auto" controls muted loop></video>
-
-[Watch the video](https://files.catbox.moe/1zblqy.mp4) if it doesn't play above.
+[Watch the video](https://files.catbox.moe/1zblqy.mp4) ~~if it doesn't play above~~ Video embed removed as Gale crashes with it.
 
 ## How it works
 
@@ -28,6 +26,12 @@ A cancel also resets your combo, so your next swing starts from the first attack
 
 After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack.
 
+### Why does it work like this?
+
+It just does. I'm happy to take suggestions if I think they are better.
+
+It's a bit odd that cancelling right before a hit is best, but I like that it introduces some risk:reward.
+
 ## Extra controls
 
 - **Dodge key:** `DodgeKey` sets a dedicated dodge key that dodges the way you're moving. (Same as the game's own `AltDodge` control.)
@@ -42,7 +46,7 @@ After a swing hits, it can't be cancelled, so blocking or dodging then works lik
 | `CancelWithBlock` / `CancelWithDodge` | on | Which inputs can cancel. |
 | `StaminaPenalty` | 1 | Extra stamina per cancel, as a multiple of the attack's cost (0 to 3). |
 | `ScaleStaminaPenalty` | on | Scale the cost by when you cancel. Off = always the full cost. |
-| `CancelledHitDamage` | 0.5 | Lowest damage multiplier for a cancelled swing that still hits. |
+| `CancelledHitDamage` | 0.5 | Lowest damage multiplier for a cancelled swing that still hits. (0 to 1) |
 | `ScaleCancelledHitDamage` | on | Weaker the longer you'd been pulling back. Off = always `CancelledHitDamage`. |
 | `NonCancellableAttacks` | knife jump attacks | Attack animations that can never be cancelled. `DebugLog` prints the name of each attack you cancel. |
 | `DodgeKey` | none | Dedicated dodge key. Local only. |

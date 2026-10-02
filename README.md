@@ -75,7 +75,7 @@ Each mod is versioned on its own. To release `<Mod>`:
 2. Add an entry to `src/<Mod>/CHANGELOG.md` and update the version in the table above.
 3. `scripts/package.sh <Mod>` → `dist/hvalch-<Mod>-<Version>.zip` (manifest, README, CHANGELOG, icon, dll).
 4. Commit, then tag `<Mod>-v<Version>` (e.g. `Unhindered-v0.1.0`).
-5. Install it: Gale → Import → Local mod → the zip. Or upload the zip to Thunderstore.
+5. Install it: Gale → Import → Local mod → the zip. Or publish it: Hexium first, then Thunderstore with `scripts/publish-thunderstore.py <Mod>`, which refuses versions not yet on Hexium (needs `.thunderstore_token`; `--check` to validate only).
 
 Gale only lists mods it installed. The copy `dotnet build` drops into the profile still loads, but it doesn't appear in Gale.
 
