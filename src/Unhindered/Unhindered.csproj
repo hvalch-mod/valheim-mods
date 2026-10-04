@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>Unhindered</AssemblyName>
     <RootNamespace>Unhindered</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <UseJotunn>true</UseJotunn>
   </PropertyGroup>
 </Project>

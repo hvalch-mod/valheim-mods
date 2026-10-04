@@ -18,7 +18,7 @@ namespace Unhindered
     {
         public const string Guid = "hvalch.Unhindered";
         public const string Name = "Unhindered";
-        public const string Version = "0.1.0";
+        public const string Version = "0.1.1";
 
         internal static ManualLogSource Log;
 

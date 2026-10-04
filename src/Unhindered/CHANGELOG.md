@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Step-up no longer activates on a cart while it is attached to you.
+
 ## 0.1.0
 
 - Initial release.

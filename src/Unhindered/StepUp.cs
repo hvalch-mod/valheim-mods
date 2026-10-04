@@ -17,6 +17,7 @@ namespace Unhindered
         private static int s_maskWithTerrain;
         private static int s_characterLayers;
         private static readonly RaycastHit[] s_hits = new RaycastHit[16];
+        internal static Rigidbody s_hauledCart; // cart the local player is pulling (HauledCart.cs): never an obstacle
 
         private static void Postfix(Character __instance, float dt)
         {
@@ -113,7 +114,7 @@ namespace Unhindered
         {
             Rigidbody attached = collider.attachedRigidbody;
             return (collider.excludeLayers & selfLayer) == 0
-                && (attached == null || (attached.excludeLayers & selfLayer) == 0);
+                && (attached == null || (!ReferenceEquals(attached, s_hauledCart) && (attached.excludeLayers & selfLayer) == 0));
         }
 
         private static string s_lastDebug;
