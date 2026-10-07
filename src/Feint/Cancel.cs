@@ -13,6 +13,10 @@ namespace Feint
     // would be slower than finishing the swing), the dodge/block starts then and the stamina penalty
     // is waived.
     //
+    // With DodgeAfterHit, a dodge after the hit also cancels the rest of the swing (its recovery). It
+    // starts right away, and its penalty (DodgeAfterHitPenalty) falls from the at-hit amount to nothing
+    // over the recovery.
+    //
     // Vanilla gates block (Humanoid.IsBlocking) and dodge (Player.UpdateDodge) on !InAttack(), and
     // InAttack() is read from the animator's state tags.
     // - Dodge: the dodge trigger is sent directly. The animator goes from the attack state straight
@@ -46,8 +50,10 @@ namespace Feint
         private static Vector3 s_pendingDodgeDir;
         private static float s_pendingAt;
         private static float s_pendingPenalty;
-        // Swing progress toward its hit when cancelled (0..1, -1 = unknown).
+        // Swing progress when cancelled (0..1, -1 = unknown): toward its hit, or, for a cancel after
+        // the hit, from the hit to the end of the swing.
         private static float s_pendingProgress;
+        private static bool s_pendingAfterHit;
         // Whether the cancelled swing's hit landed during the delay, and how far into the delay.
         private static bool s_pendingHit;
         private static float s_pendingPulledBack;
@@ -79,7 +85,8 @@ namespace Feint
             }
 
             Track(attack);
-            if (s_triggered)
+            bool afterHit = s_triggered;
+            if (afterHit && !(dodge && Plugin.DodgeAfterHit.Value))
             {
                 Debug("refused: the swing has already hit");
                 return false;
@@ -95,9 +102,12 @@ namespace Feint
                 return false;
             }
             float elapsed = Time.time - s_attackStartTime;
-            float delay = DelayOfElapsed * elapsed;
+            // After the hit there's nothing left to stop: dodge right away.
+            float delay = afterHit ? 0f : DelayOfElapsed * elapsed;
 
-            float penalty = attack.GetAttackStamina() * Plugin.StaminaPenalty.Value;
+            float penalty = afterHit && !Plugin.DodgeAfterHitPenalty.Value
+                ? 0f
+                : attack.GetAttackStamina() * Plugin.StaminaPenalty.Value;
             float needed = penalty + (dodge ? player.GetDodgeStaminaUse() : 0f);
             if (needed > 0f && !player.HaveStamina(needed))
             {
@@ -108,9 +118,10 @@ namespace Feint
 
             // The dodge is started by us after the delay, not by vanilla's queue.
             player.m_queuedDodgeTimer = 0f;
-            float progress = HitProgress.Get(player.m_animator);
+            float progress = afterHit ? HitProgress.Recovery(player.m_animator) : HitProgress.Get(player.m_animator);
             Debug($"cancelled {attack.m_attackAnimation} with {(dodge ? "dodge" : "block")}, " +
-                $"{elapsed:0.##}s into the swing ({progress:P0} to the hit), delay {delay:0.##}s");
+                $"{elapsed:0.##}s into the swing " +
+                $"({progress:P0} {(afterHit ? "through the recovery" : "to the hit")}), delay {delay:0.##}s");
 
             s_pendingPlayer = player;
             s_pendingAttack = attack;
@@ -121,6 +132,7 @@ namespace Feint
             s_pendingDodgeDir = player.m_queuedDodgeDir;
             s_pendingPenalty = penalty;
             s_pendingProgress = progress;
+            s_pendingAfterHit = afterHit;
             s_pendingHit = false;
             // Started from Update, after SetControls has applied this frame's input.
             s_pendingAt = Time.time + delay;
@@ -199,9 +211,14 @@ namespace Feint
         }
 
         // 0 for a cancel at the start of the swing, rising quickly to 1 at the peak (the latest cancel
-        // whose delay ends before the hit), then falling to PenaltyAtHit for a cancel right at the hit.
+        // whose delay ends before the hit), then falling to PenaltyAtHit for a cancel right at the hit,
+        // and on to 0 for a dodge after the hit at the end of the swing.
         private static float PenaltyScale()
         {
+            if (s_pendingAfterHit)
+            {
+                return s_pendingProgress < 0f ? PenaltyAtHit : Mathf.Lerp(PenaltyAtHit, 0f, s_pendingProgress);
+            }
             if (s_pendingHit)
             {
                 return Mathf.Lerp(PenaltyAtHit, 1f, s_pendingPulledBack);
@@ -393,7 +410,7 @@ namespace Feint
                 }
                 Track(__instance);
                 s_triggered = true;
-                if (ReferenceEquals(__instance, s_pendingAttack))
+                if (ReferenceEquals(__instance, s_pendingAttack) && !s_pendingAfterHit)
                 {
                     s_pendingHit = true;
                     s_pendingPulledBack = s_pendingDelay > 0f

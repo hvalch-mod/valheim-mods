@@ -7,7 +7,7 @@ BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed str
 | Mod | Version | What it does |
 |---|---|---|
 | [Unhindered](src/Unhindered/README.md) | 0.1.1 | Walk through small plants; step over logs and low rocks without jumping. |
-| [Feint](src/Feint/README.md) | 0.1.0 | Cancel attacks by blocking or dodging, at a stamina cost. |
+| [Feint](src/Feint/README.md) | 0.2.0 | Cancel attacks by blocking or dodging, at a stamina cost. |
 
 `src/ExampleMod` is a reference sample and `src/TestTools` is a testing aid (console commands `noon`, `give`, `items`, `weapons`, `food`); neither is released.
 

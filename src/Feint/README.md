@@ -4,9 +4,11 @@ Changed your mind mid-swing? Block or dodge to cancel the attack before it lands
 
 I got sick of being one-shot because I got greedy with a combo and couldn't back out of it. I'll still die, but now I have a bit more control. I didn't want that control for free, though. Other mods already let you cancel attacks ([AttackCancel](https://thunderstore.io/c/valheim/p/MrGay/AttackCancel/), for one), but I wanted cancelling to come with tradeoffs.
 
-## Video demo
+## Video demos
 
 [Watch the video](https://files.catbox.moe/1zblqy.mp4) ~~if it doesn't play above~~ Video embed removed as Gale crashes with it.
+
+[Watch the dodge after hit video](https://files.catbox.moe/jv8vdq.mp4) (`DodgeAfterHit` only).
 
 ## How it works
 
@@ -25,6 +27,8 @@ A cancel costs extra stamina, up to the swing's own stamina cost. How much depen
 A cancel also resets your combo, so your next swing starts from the first attack.
 
 After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack.
+
+With `DodgeAfterHit` on, you can also dodge after the hit to skip the rest of the swing. The dodge starts right away. By default this costs extra stamina too (`DodgeAfterHitPenalty`): half the full amount right after the hit, dropping to nothing by the end of the swing.
 
 ### Why does it work like this?
 
@@ -48,6 +52,8 @@ It's a bit odd that cancelling right before a hit is best, but I like that it in
 | `ScaleStaminaPenalty` | on | Scale the cost by when you cancel. Off = always the full cost. |
 | `CancelledHitDamage` | 0.5 | Lowest damage multiplier for a cancelled swing that still hits. (0 to 1) |
 | `ScaleCancelledHitDamage` | on | Weaker the longer you'd been pulling back. Off = always `CancelledHitDamage`. |
+| `DodgeAfterHit` | off | Dodging after the hit skips the rest of the swing. |
+| `DodgeAfterHitPenalty` | on | Charge extra stamina for a dodge after the hit, scaled like other cancels. Off = only the dodge's cost. |
 | `NonCancellableAttacks` | knife jump attacks | Attack animations that can never be cancelled. `DebugLog` prints the name of each attack you cancel. |
 | `DodgeKey` | none | Dedicated dodge key. Local only. |
 | `BlockJump` | Dodge | What jump does while blocking. Local only. |

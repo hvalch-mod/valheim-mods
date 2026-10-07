@@ -26,7 +26,7 @@ namespace Feint
     {
         public const string Guid = "hvalch.Feint";
         public const string Name = "Feint";
-        public const string Version = "0.1.0";
+        public const string Version = "0.2.0";
 
         internal static ManualLogSource Log;
 
@@ -38,6 +38,8 @@ namespace Feint
         internal static ConfigEntry<string> NonCancellableAttacks;
         internal static ConfigEntry<float> CancelledHitDamage;
         internal static ConfigEntry<bool> ScaleCancelledHitDamage;
+        internal static ConfigEntry<bool> DodgeAfterHit;
+        internal static ConfigEntry<bool> DodgeAfterHitPenalty;
 
         // Controls: local, never synced.
         internal static ConfigEntry<KeyboardShortcut> DodgeKey;
@@ -72,6 +74,13 @@ namespace Feint
                 "Scale a cancelled swing's damage by how long you had been pulling back when it hit: full " +
                 "damage if it hit right after the cancel, down to CancelledHitDamage if it hit just before the " +
                 "block/dodge started. Off = always CancelledHitDamage.");
+            DodgeAfterHit = BindSynced(c, "DodgeAfterHit", false,
+                "Dodging after the swing has hit also cancels it, skipping the rest of the swing. " +
+                "The dodge starts right away. Needs CancelWithDodge. Off = vanilla (the dodge waits for the swing to end).");
+            DodgeAfterHitPenalty = BindSynced(c, "DodgeAfterHitPenalty", true,
+                "Charge the StaminaPenalty for a dodge after the hit. With ScaleStaminaPenalty it falls from the " +
+                "at-hit amount (half) right after the hit to nothing at the end of the swing. " +
+                "Off = only the dodge's own stamina.");
             NonCancellableAttacks = BindSynced(c, "NonCancellableAttacks", "knife_secondary,dual_knives_secondary",
                 "Comma-separated attack animation names that can never be cancelled (e.g. the knife's jump " +
                 "attack). DebugLog prints the name of each attack you cancel.");

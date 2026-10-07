@@ -15,8 +15,21 @@ namespace Feint
         private static readonly Dictionary<AnimationClip, float> s_hitFraction = new Dictionary<AnimationClip, float>();
 
         // -1 if unknown (no attack state, or its clip has no hit event).
-        internal static float Get(Animator animator)
+        internal static float Get(Animator animator) =>
+            Find(animator, out float time, out float hit) ? Mathf.Clamp01(time / hit) : -1f;
+
+        // How far the current swing is from its hit to the end of its clip, from 0 (hit) to 1 (end).
+        // -1 if unknown.
+        internal static float Recovery(Animator animator) =>
+            Find(animator, out float time, out float hit)
+                ? hit < 1f ? Mathf.Clamp01((time - hit) / (1f - hit)) : 1f
+                : -1f;
+
+        // The attack state's normalized time and the hit's position in its clip (0..1).
+        private static bool Find(Animator animator, out float time, out float hit)
         {
+            time = 0f;
+            hit = -1f;
             for (int layer = 0; layer < animator.layerCount; layer++)
             {
                 bool transition = animator.IsInTransition(layer);
@@ -41,10 +54,11 @@ namespace Feint
                         weight = info.weight;
                     }
                 }
-                float hit = clip != null ? HitFraction(clip) : -1f;
-                return hit > 0f ? Mathf.Clamp01(state.normalizedTime / hit) : -1f;
+                time = state.normalizedTime;
+                hit = clip != null ? HitFraction(clip) : -1f;
+                return hit > 0f;
             }
-            return -1f;
+            return false;
         }
 
         private static float HitFraction(AnimationClip clip)
