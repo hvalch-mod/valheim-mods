@@ -18,6 +18,7 @@ namespace TestTools
     //   items [search]      - list items (prefab and display name) matching search, case insensitive.
     //   weapons             - a random craftable weapon of each type, plus 100 ammo for ranged ones.
     //   food [n]            - n (default 10) of each of the 3 best stamina foods.
+    // On a dedicated server, an admin client can use dev commands as if hosting (AdminCheats).
     // Feint testing (config section "Feint"):
     //   an on-screen timeline of each attack and its cancel (CancelTimeline), and
     //   a key that attacks, then dodges or blocks after a set offset (AttackMacro).
