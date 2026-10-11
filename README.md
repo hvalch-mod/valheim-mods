@@ -1,6 +1,6 @@
 # Valheim mod dev
 
-BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed straight into the Gale `Server` profile.
+BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed straight into the Gale `Default` profile.
 
 ## Mods
 
@@ -14,7 +14,7 @@ BepInEx 5 plugins for Valheim, built with the .NET SDK on Linux and deployed str
 ## Layout
 
 - `Directory.Build.props` — paths + references shared by every mod (BepInEx, Harmony, game + Unity assemblies). Game assemblies are **publicized** at build time, so private members (`Player.Awake`, `m_staminaRegen`, ...) compile directly.
-- `Directory.Build.targets` — after build, copies `<Mod>.dll` + `.pdb` to `profiles/Server/BepInEx/plugins/<Author>-<Mod>/`.
+- `Directory.Build.targets` — after build, copies `<Mod>.dll` + `.pdb` to `profiles/Default/BepInEx/plugins/<Author>-<Mod>/`.
 - `src/<Mod>/` — one project per mod.
 - `scripts/new-mod.sh <Name> [--jotunn]` — scaffold a new mod and add it to the solution.
 - `scripts/package.sh [Mod ...]` — build Thunderstore zips into `dist/` (all mods if no args).
@@ -34,7 +34,7 @@ Author = `hvalch` (Thunderstore team; `<Author>` in `Directory.Build.props`). Mo
 
 ## Paths
 
-Defaults: game at `/home/games/steamapps/common/Valheim`, profile at `~/.local/share/com.kesomannen.gale/valheim/profiles/Server`.
+Defaults: game at `/home/games/steamapps/common/Valheim`, profile at `~/.local/share/com.kesomannen.gale/valheim/profiles/Default`.
 Override by creating `Environment.props` (gitignored):
 
 ```xml
@@ -54,8 +54,8 @@ dotnet build -p:DeployToProfile=false    # build only
 dotnet build src/Foo                     # one mod
 ```
 
-Then launch Valheim through Gale (Server profile). Logs: `profiles/Server/BepInEx/LogOutput.log`.
-Config files appear in `profiles/Server/BepInEx/config/<GUID>.cfg` after first run.
+Then launch Valheim through Gale (Default profile). Logs: `profiles/Default/BepInEx/LogOutput.log`.
+Config files appear in `profiles/Default/BepInEx/config/<GUID>.cfg` after first run.
 
 Anything deployed into the profile goes to the dedicated server on the next server sync. Remove `BepInEx/plugins/hvalch-<Mod>/` from the profile if a mod should stay local.
 

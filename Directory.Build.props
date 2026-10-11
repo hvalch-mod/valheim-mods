@@ -5,7 +5,7 @@
   <PropertyGroup>
     <Author Condition="'$(Author)' == ''">hvalch</Author>
     <ValheimDir Condition="'$(ValheimDir)' == ''">/home/games/steamapps/common/Valheim</ValheimDir>
-    <ProfileDir Condition="'$(ProfileDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/valheim/profiles/Server</ProfileDir>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/valheim/profiles/Default</ProfileDir>
     <ManagedDir>$(ValheimDir)/valheim_Data/Managed</ManagedDir>
     <BepInExDir>$(ProfileDir)/BepInEx</BepInExDir>
     <PluginsDir>$(BepInExDir)/plugins</PluginsDir>
