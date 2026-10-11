@@ -1,6 +1,6 @@
 # Feint
 
-Changed your mind mid-swing? Block or dodge to cancel the attack before it lands, at a stamina cost.
+Cancel attacks by blocking or dodging, at a stamina cost. Dodge out after a hit and carry on your combo.
 
 I got sick of being one-shot because I got greedy with a combo and couldn't back out of it. I'll still die, but now I have a bit more control. I didn't want that control for free, though. Other mods already let you cancel attacks ([AttackCancel](https://thunderstore.io/c/valheim/p/MrGay/AttackCancel/), for one), but I wanted cancelling to come with tradeoffs.
 
@@ -24,7 +24,7 @@ A cancel costs extra stamina, up to the swing's own stamina cost. How much depen
 
 ![Extra stamina for a cancel by when you cancel](https://raw.githubusercontent.com/hvalch-mod/valheim-mods/main/src/Feint/docs/stamina.png)
 
-A cancel also resets your combo, so your next swing starts from the first attack.
+A cancel also resets your combo, so your next swing starts from the first attack. With `KeepCombo` on, that only happens if you cancel before the hit (see [Keeping combos](#keeping-combos)).
 
 After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack before it hits.
 
@@ -35,6 +35,12 @@ With `DodgeAfterHit` on, you can also dodge after the hit to skip the rest of th
 It just does. I'm happy to take suggestions if I think they are better.
 
 It's a bit odd that cancelling right before a hit is best, but I like that it introduces some risk:reward.
+
+## Keeping combos
+
+In vanilla, your combo resets if you wait more than 0.2 seconds between swings. With `KeepCombo` on, you have `ComboKeepSeconds` (1 second by default). It also works when you dodge out after the hit (`DodgeAfterHit`), or when you cancel but the hit lands anyway. Only cancelling a swing before it hits resets the combo.
+
+In vanilla, only a combo's first swing turns you toward where you're aiming. Later swings barely turn. A swing that `KeepCombo` continues turns toward your aim too, but by at most 90°. You can fix your aim after a pause or a dodge, but to hit something behind you, you still have to turn yourself or start the combo over.
 
 ## Extra controls
 
@@ -54,6 +60,8 @@ It's a bit odd that cancelling right before a hit is best, but I like that it in
 | `ScaleCancelledHitDamage` | on | Weaker the longer you'd been pulling back. Off = always `CancelledHitDamage`. |
 | `DodgeAfterHit` | off | Dodging after the hit skips the rest of the swing. |
 | `DodgeAfterHitPenalty` | on | Charge extra stamina for a dodge after the hit, scaled like other cancels. Off = only the dodge's cost. |
+| `KeepCombo` | off | Give yourself longer between swings before the combo resets. Off = vanilla. |
+| `ComboKeepSeconds` | 1 | How long the combo is kept after a swing ends (0.2 to 3). |
 | `NonCancellableAttacks` | knife jump attacks | Attack animations that block and dodge can't cancel before the hit. `DodgeAfterHit` still works for them. `DebugLog` prints the name of each attack you cancel. |
 | `DodgeKey` | none | Dedicated dodge key. Local only. |
 | `BlockJump` | Dodge | What jump does while blocking. Local only. |

@@ -205,8 +205,8 @@ namespace Feint
             {
                 player.m_currentAttack = null;
             }
-            // Start the next attack from the beginning of the combo.
-            player.m_previousAttack = null;
+            // The next attack continues the combo only if this swing hit (KeepCombo); otherwise it starts over.
+            player.m_previousAttack = KeepsCombo(s_pendingAfterHit || s_pendingHit) ? attack : null;
             ResetAttackTriggers(player.m_animator, attack);
             // Drop clicks made while waiting, so the block/dodge isn't followed by a swing.
             player.m_queuedAttackTimer = 0f;
@@ -356,6 +356,46 @@ namespace Feint
             }
         }
 
+        // KeepCombo: a swing that reached its hit keeps the combo going for ComboKeepSeconds after it
+        // ends, also when a dodge or block cancels it.
+        private static bool KeepsCombo(bool hitDone) => hitDone && Plugin.KeepCombo.Value;
+
+        // Vanilla turns the player toward their aim only on a combo's first swing (Attack.Start). A swing
+        // continued by KeepCombo turns the same way, but at most KeptComboMaxTurn: it can correct the aim
+        // after a pause or dodge, but not swing straight behind without starting over.
+        private const float KeptComboMaxTurn = 90f;
+
+        private static void TurnKeptCombo(Player player)
+        {
+            Attack attack = player.m_currentAttack;
+            if (attack == null || attack.m_attackType == Attack.AttackType.None || attack.m_currentAttackCainLevel == 0)
+            {
+                return;
+            }
+            Quaternion target;
+            if (!player.AttackTowardsPlayerLookDir || attack.m_attackType == Attack.AttackType.Projectile)
+            {
+                target = player.GetLookYaw();
+            }
+            else
+            {
+                Vector3 moveDir = player.GetMoveDir();
+                if (moveDir.sqrMagnitude <= 0f)
+                {
+                    return;
+                }
+                target = Quaternion.LookRotation(moveDir);
+            }
+            player.transform.rotation = Quaternion.RotateTowards(player.transform.rotation, target, KeptComboMaxTurn);
+            player.m_body.rotation = player.transform.rotation;
+        }
+
+        // The last swing KeepCombo continued (only it is held back while its animation starts).
+        private static Attack s_keptSwing;
+
+        // How long a kept swing waits for its animation before a new swing may replace it.
+        private const float SwingStartGraceSeconds = 0.5f;
+
         // Drop combo triggers set for this weapon, so a queued next swing doesn't start by itself.
         private static void ResetAttackTriggers(Animator animator, Attack attack)
         {
@@ -392,15 +432,38 @@ namespace Feint
                 : animator.GetCurrentAnimatorStateInfo(layer).tagHash;
 
         // Before a swing starts, remember each layer's current (non-attack) state; once it has started,
-        // remember when.
+        // remember when. Also extends the combo window (KeepCombo).
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.StartAttack))]
         private static class StartAttackPatch
         {
-            private static void Postfix(Humanoid __instance, bool __result)
+            private static void Postfix(Humanoid __instance, bool __result, float __state)
             {
-                if (__result && __instance == Player.m_localPlayer)
+                if (__instance != Player.m_localPlayer)
+                {
+                    return;
+                }
+                if (__result)
                 {
                     s_attackStartTime = Time.time;
+                    Attack a = __instance.m_currentAttack;
+                    if (Plugin.DebugLog.Value && a != null)
+                    {
+                        Attack p = __instance.m_previousAttack;
+                        Debug($"swing {a.m_attackAnimation} level {a.m_currentAttackCainLevel}/{a.m_attackChainLevels}" +
+                            (p == null ? ", no previous" : $", previous {p.m_attackAnimation} level {p.m_currentAttackCainLevel} next {p.m_nextAttackChainLevel}") +
+                            $", {(__state >= 0f ? __state : __instance.m_timeSinceLastAttack):0.##}s since the last swing");
+                    }
+                    if (__state > 0.2f)
+                    {
+                        Debug($"combo kept {__state:0.##}s after the last swing");
+                        s_keptSwing = __instance.m_currentAttack;
+                        TurnKeptCombo((Player)__instance);
+                    }
+                }
+                else if (__state >= 0f)
+                {
+                    // No swing started: a refused press mustn't extend the window.
+                    __instance.m_timeSinceLastAttack = __state;
                 }
             }
 
@@ -408,14 +471,26 @@ namespace Feint
             // (e.g. EpicLoot's Throwable), and skips vanilla's StartAttack while a cancel is pending.
             // Returning false doesn't stop other mods' prefixes, so one of them may still start a swing.
             [HarmonyPriority(Priority.First)]
-            private static bool Prefix(Humanoid __instance)
+            private static bool Prefix(Humanoid __instance, out float __state)
             {
+                __state = -1f;
                 if (__instance != Player.m_localPlayer)
                 {
                     return true;
                 }
                 // No new swing (or combo step) while a cancel is waiting to start its dodge/block.
                 if (s_pendingPlayer != null)
+                {
+                    return false;
+                }
+                // KeepCombo: holding attack calls StartAttack every frame, and vanilla replaces a swing whose
+                // animation hasn't started yet (after a kept combo's pause, the animator can take a moment to
+                // leave the last one). The replacement restarts the combo, since the next level is set only
+                // once the animation starts, while the animator still plays the replaced swing's trigger: the
+                // same combo step plays twice.
+                Attack current = __instance.m_currentAttack;
+                if (Plugin.KeepCombo.Value && current != null && ReferenceEquals(current, s_keptSwing) &&
+                    !current.m_attackDone && !current.m_wasInAttack && current.m_time < SwingStartGraceSeconds)
                 {
                     return false;
                 }
@@ -435,6 +510,15 @@ namespace Feint
                     {
                         s_restoreState[layer] = state.fullPathHash;
                     }
+                }
+                // Vanilla resets the combo when more than 0.2 s have passed since the last attack ended.
+                Attack previous = __instance.m_currentAttack ?? __instance.m_previousAttack;
+                // Not across a weapon swap (vanilla keeps it within 0.2 s for the same kind of weapon).
+                if (previous != null && KeepsCombo(HitDone(previous)) && previous.GetWeapon() == __instance.GetCurrentWeapon() &&
+                    __instance.m_timeSinceLastAttack <= Plugin.ComboKeepSeconds.Value)
+                {
+                    __state = __instance.m_timeSinceLastAttack;
+                    __instance.m_timeSinceLastAttack = 0f;
                 }
                 return true;
             }

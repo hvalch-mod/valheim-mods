@@ -26,7 +26,7 @@ namespace Feint
     {
         public const string Guid = "hvalch.Feint";
         public const string Name = "Feint";
-        public const string Version = "0.2.1";
+        public const string Version = "0.3.0";
 
         internal static ManualLogSource Log;
 
@@ -40,6 +40,10 @@ namespace Feint
         internal static ConfigEntry<bool> ScaleCancelledHitDamage;
         internal static ConfigEntry<bool> DodgeAfterHit;
         internal static ConfigEntry<bool> DodgeAfterHitPenalty;
+
+        // Combo: server-synced.
+        internal static ConfigEntry<bool> KeepCombo;
+        internal static ConfigEntry<float> ComboKeepSeconds;
 
         // Controls: local, never synced.
         internal static ConfigEntry<KeyboardShortcut> DodgeKey;
@@ -85,6 +89,16 @@ namespace Feint
                 "Comma-separated attack animation names that block and dodge can't cancel before the hit (e.g. the " +
                 "knife's jump attack). Only affects cancelling before the hit: DodgeAfterHit still works for them. " +
                 "DebugLog prints the name of each attack you cancel.");
+
+            const string m = "3 - Combo";
+            KeepCombo = BindSynced(m, "KeepCombo", false,
+                "Keep your combo going for ComboKeepSeconds between swings, also after a dodge or block. " +
+                "Cancelling a swing before it hits still resets the combo. " +
+                "The kept swing turns toward your aim by up to 90 degrees (vanilla only turns a combo's first swing). " +
+                "Off = vanilla (the combo resets 0.2 seconds after a swing ends, and any cancel resets it).");
+            ComboKeepSeconds = BindSynced(m, "ComboKeepSeconds", 1f,
+                "How long after a swing ends the next swing still continues the combo (KeepCombo).",
+                new AcceptableValueRange<float>(0.2f, 3f));
 
             const string k = "2 - Controls";
             DodgeKey = Config.Bind(k, "DodgeKey", KeyboardShortcut.Empty,

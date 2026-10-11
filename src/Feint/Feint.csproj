@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>Feint</AssemblyName>
     <RootNamespace>Feint</RootNamespace>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
     <UseJotunn>true</UseJotunn>
   </PropertyGroup>
 </Project>
