@@ -18,7 +18,7 @@ namespace Unhindered
     {
         public const string Guid = "hvalch.Unhindered";
         public const string Name = "Unhindered";
-        public const string Version = "0.1.1";
+        public const string Version = "0.2.0";
 
         internal static ManualLogSource Log;
 
@@ -38,6 +38,9 @@ namespace Unhindered
         internal static ConfigEntry<float> StepUpSpeed;
         internal static ConfigEntry<bool> StepUpOnTerrain;
         internal static ConfigEntry<bool> StepUpDebug;
+
+        // Character slide: slide around other characters instead of sticking to them.
+        internal static ConfigEntry<bool> CharacterSlideEnabled;
 
         private readonly Harmony _harmony = new Harmony(Guid);
 
@@ -81,6 +84,10 @@ namespace Unhindered
             StepUpDebug = Config.Bind(su, "DebugLog", false,
                 "Log why each obstacle you walk into is or isn't stepped onto (to LogOutput.log). Local only, never synced.");
 
+            const string cs = "3 - Character Slide";
+            CharacterSlideEnabled = BindSynced(cs, "Enabled", true,
+                "Slide around enemies and other players you walk into, the way you slide around trees, instead of sticking to them.");
+
             // In-game config manager edits and server sync re-apply live.
             Config.SettingChanged += (_, e) =>
             {
@@ -88,15 +95,21 @@ namespace Unhindered
                 {
                     PassThrough.MarkDirty();
                 }
+                CharacterSlide.SetEnabled(CharacterSlideEnabled.Value);
             };
 
+            CharacterSlide.Init();
             _harmony.PatchAll();
             Log.LogInfo($"{Name} {Version} loaded");
         }
 
         private void Update() => PassThrough.RefreshIfDirty();
 
-        private void OnDestroy() => _harmony.UnpatchSelf();
+        private void OnDestroy()
+        {
+            CharacterSlide.Shutdown();
+            _harmony.UnpatchSelf();
+        }
 
         // Admin-only entries are overwritten by the server's values when the server runs this mod.
         private ConfigEntry<T> BindSynced<T>(string section, string key, T value, string description,

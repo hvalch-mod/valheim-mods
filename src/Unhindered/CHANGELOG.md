@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Character slide: walking into enemies or other players slides you around them, like trees, instead of sticking.
+
 ## 0.1.1
 
 - Step-up no longer activates on a cart while it is attached to you.
