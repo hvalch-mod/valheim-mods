@@ -26,7 +26,7 @@ namespace Feint
     {
         public const string Guid = "hvalch.Feint";
         public const string Name = "Feint";
-        public const string Version = "0.2.0";
+        public const string Version = "0.2.1";
 
         internal static ManualLogSource Log;
 
@@ -76,14 +76,15 @@ namespace Feint
                 "block/dodge started. Off = always CancelledHitDamage.");
             DodgeAfterHit = BindSynced(c, "DodgeAfterHit", false,
                 "Dodging after the swing has hit also cancels it, skipping the rest of the swing. " +
-                "The dodge starts right away. Needs CancelWithDodge. Off = vanilla (the dodge waits for the swing to end).");
+                "The dodge starts right away (on landing, if in the air), also for NonCancellableAttacks. Needs CancelWithDodge. Off = vanilla (the dodge waits for the swing to end).");
             DodgeAfterHitPenalty = BindSynced(c, "DodgeAfterHitPenalty", true,
                 "Charge the StaminaPenalty for a dodge after the hit. With ScaleStaminaPenalty it falls from the " +
                 "at-hit amount (half) right after the hit to nothing at the end of the swing. " +
                 "Off = only the dodge's own stamina.");
             NonCancellableAttacks = BindSynced(c, "NonCancellableAttacks", "knife_secondary,dual_knives_secondary",
-                "Comma-separated attack animation names that can never be cancelled (e.g. the knife's jump " +
-                "attack). DebugLog prints the name of each attack you cancel.");
+                "Comma-separated attack animation names that block and dodge can't cancel before the hit (e.g. the " +
+                "knife's jump attack). Only affects cancelling before the hit: DodgeAfterHit still works for them. " +
+                "DebugLog prints the name of each attack you cancel.");
 
             const string k = "2 - Controls";
             DodgeKey = Config.Bind(k, "DodgeKey", KeyboardShortcut.Empty,

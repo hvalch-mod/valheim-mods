@@ -14,8 +14,8 @@ namespace Feint
     // is waived.
     //
     // With DodgeAfterHit, a dodge after the hit also cancels the rest of the swing (its recovery). It
-    // starts right away, and its penalty (DodgeAfterHitPenalty) falls from the at-hit amount to nothing
-    // over the recovery.
+    // starts right away (or on landing, if in the air), also for NonCancellableAttacks, and
+    // its penalty (DodgeAfterHitPenalty) falls from the at-hit amount to nothing over the recovery.
     //
     // Vanilla gates block (Humanoid.IsBlocking) and dodge (Player.UpdateDodge) on !InAttack(), and
     // InAttack() is read from the animator's state tags.
@@ -64,6 +64,12 @@ namespace Feint
         // Penalty for a cancel right at the hit, as a fraction of the full penalty.
         private const float PenaltyAtHit = 0.5f;
 
+        // Vanilla's dodge queue length (Player.Dodge).
+        private const float QueuedDodgeSeconds = 0.5f;
+
+        // Set at the hit; the queued-dodge check runs on the next Update.
+        private static bool s_hitQueueCheck;
+
         // Pending check whether the dodge trigger took the animator out of the attack.
         private static Player s_checkPlayer;
         private static int s_checkFrame;
@@ -72,7 +78,8 @@ namespace Feint
         // Covers an animator that updates on the physics step.
         private const float CheckSeconds = 0.05f;
 
-        internal static bool TryCancel(Player player, bool dodge)
+        // quiet: no stamina flash on refusal (already flashed for this press).
+        internal static bool TryCancel(Player player, bool dodge, bool quiet = false)
         {
             if (!(dodge ? Plugin.CancelWithDodge.Value : Plugin.CancelWithBlock.Value))
             {
@@ -91,12 +98,14 @@ namespace Feint
                 Debug("refused: the swing has already hit");
                 return false;
             }
-            if (IsExcluded(attack.m_attackAnimation))
+            // Excluded attacks still allow a dodge after the hit.
+            if (!afterHit && IsExcluded(attack.m_attackAnimation))
             {
                 Debug($"refused: {attack.m_attackAnimation} is in NonCancellableAttacks");
                 return false;
             }
-            if (!player.IsOnGround())
+            // A dodge after the hit may start in the air (e.g. the knife's jump attack): it waits for the landing.
+            if (!afterHit && !player.IsOnGround())
             {
                 Debug("refused: in the air");
                 return false;
@@ -111,7 +120,10 @@ namespace Feint
             float needed = penalty + (dodge ? player.GetDodgeStaminaUse() : 0f);
             if (needed > 0f && !player.HaveStamina(needed))
             {
-                Hud.instance?.StaminaBarEmptyFlash();
+                if (!quiet)
+                {
+                    Hud.instance?.StaminaBarEmptyFlash();
+                }
                 Debug($"refused: not enough stamina ({needed:0.#} needed)");
                 return false;
             }
@@ -142,8 +154,29 @@ namespace Feint
         // Called every frame from Plugin.Update.
         internal static void Update()
         {
+            UpdateHitQueue();
             UpdatePending();
             UpdateCheck();
+        }
+
+        // A dodge pressed before the hit but refused (e.g. NonCancellableAttacks, or in the air) stays in
+        // vanilla's dodge queue (0.5 s). If it's still queued when the swing hits, it becomes a dodge after
+        // the hit. Pressed too early, it has expired by then; a later attack press drops it (AttackInputPatch).
+        private static void UpdateHitQueue()
+        {
+            if (!s_hitQueueCheck)
+            {
+                return;
+            }
+            s_hitQueueCheck = false;
+            Player player = Player.m_localPlayer;
+            if (player == null || player.m_queuedDodgeTimer <= 0f || !Plugin.DodgeAfterHit.Value ||
+                !ReferenceEquals(player.m_currentAttack, s_tracked))
+            {
+                return;
+            }
+            Debug("dodge queued before the hit");
+            TryCancel(player, dodge: true, quiet: true);
         }
 
         private static void UpdatePending()
@@ -155,7 +188,7 @@ namespace Feint
             Player player = s_pendingPlayer;
             // The swing's animation ended on its own before the delay: no faster than not cancelling.
             bool swingEnded = player == Player.m_localPlayer && !player.InAttack();
-            if (!swingEnded && Time.time < s_pendingAt)
+            if (!swingEnded && (Time.time < s_pendingAt || s_pendingAfterHit && !player.IsOnGround()))
             {
                 return;
             }
@@ -202,6 +235,13 @@ namespace Feint
                     s_checkFrame = Time.frameCount + CheckFrames;
                     s_checkTime = Time.time + CheckSeconds;
                 }
+            }
+            else if (s_pendingDodge && swingEnded && !player.IsOnGround())
+            {
+                // Still in the air when the swing ended: hand the dodge back to vanilla's queue, which
+                // starts it on landing.
+                player.m_queuedDodgeTimer = QueuedDodgeSeconds;
+                player.m_queuedDodgeDir = s_pendingDodgeDir;
             }
             else if (!swingEnded)
             {
@@ -305,6 +345,8 @@ namespace Feint
             return false;
         }
 
+        private static bool HitDone(Attack attack) => s_triggered && ReferenceEquals(s_tracked, attack);
+
         private static void Track(Attack attack)
         {
             if (!ReferenceEquals(s_tracked, attack))
@@ -363,7 +405,8 @@ namespace Feint
             }
 
             // First: records the pre-swing state even when another mod's prefix replaces StartAttack
-            // (e.g. EpicLoot's Throwable), and holds back every new swing while a cancel is pending.
+            // (e.g. EpicLoot's Throwable), and skips vanilla's StartAttack while a cancel is pending.
+            // Returning false doesn't stop other mods' prefixes, so one of them may still start a swing.
             [HarmonyPriority(Priority.First)]
             private static bool Prefix(Humanoid __instance)
             {
@@ -408,8 +451,14 @@ namespace Feint
                 {
                     return;
                 }
+                // Vanilla returns early without hitting when staggered or out of ammo.
+                if (__instance.m_character.IsStaggering() || !Attack.HaveAmmo(__instance.m_character, __instance.m_weapon))
+                {
+                    return;
+                }
                 Track(__instance);
                 s_triggered = true;
+                s_hitQueueCheck = true;
                 if (ReferenceEquals(__instance, s_pendingAttack) && !s_pendingAfterHit)
                 {
                     s_pendingHit = true;
@@ -421,6 +470,23 @@ namespace Feint
                     // The Attack is a per-swing clone of the weapon's, so this only affects this swing.
                     __instance.m_damageMultiplier = s_pendingBaseDamage * scale;
                     Debug($"cancelled swing hit {s_pendingPulledBack:P0} into the cancel delay: damage x{scale:0.##}");
+                }
+            }
+        }
+
+        // With DodgeAfterHit, an attack press during a swing, before its hit, replaces a dodge queued earlier
+        // in it: the latest press wins. Otherwise vanilla keeps the queued dodge.
+        [HarmonyPatch(typeof(Player), nameof(Player.PlayerAttackInput))]
+        private static class AttackInputPatch
+        {
+            private static void Prefix(Player __instance)
+            {
+                if (__instance == Player.m_localPlayer && Plugin.DodgeAfterHit.Value && Plugin.CancelWithDodge.Value &&
+                    (__instance.m_attack || __instance.m_secondaryAttack) && __instance.m_queuedDodgeTimer > 0f &&
+                    __instance.InAttack() && !HitDone(__instance.m_currentAttack))
+                {
+                    __instance.m_queuedDodgeTimer = 0f;
+                    Debug("queued dodge replaced by an attack press");
                 }
             }
         }

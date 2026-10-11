@@ -26,9 +26,9 @@ A cancel costs extra stamina, up to the swing's own stamina cost. How much depen
 
 A cancel also resets your combo, so your next swing starts from the first attack.
 
-After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack.
+After a swing hits, it can't be cancelled, so blocking or dodging then works like vanilla. You also can't cancel in the air or during the knife's jump attack before it hits.
 
-With `DodgeAfterHit` on, you can also dodge after the hit to skip the rest of the swing. The dodge starts right away. By default this costs extra stamina too (`DodgeAfterHitPenalty`): half the full amount right after the hit, dropping to nothing by the end of the swing.
+With `DodgeAfterHit` on, you can also dodge after the hit to skip the rest of the swing. The dodge starts right away, or when you land if you're in the air. This works for every attack, including `NonCancellableAttacks`. By default this costs extra stamina too (`DodgeAfterHitPenalty`): half the full amount right after the hit, dropping to nothing by the end of the swing.
 
 ### Why does it work like this?
 
@@ -54,7 +54,7 @@ It's a bit odd that cancelling right before a hit is best, but I like that it in
 | `ScaleCancelledHitDamage` | on | Weaker the longer you'd been pulling back. Off = always `CancelledHitDamage`. |
 | `DodgeAfterHit` | off | Dodging after the hit skips the rest of the swing. |
 | `DodgeAfterHitPenalty` | on | Charge extra stamina for a dodge after the hit, scaled like other cancels. Off = only the dodge's cost. |
-| `NonCancellableAttacks` | knife jump attacks | Attack animations that can never be cancelled. `DebugLog` prints the name of each attack you cancel. |
+| `NonCancellableAttacks` | knife jump attacks | Attack animations that block and dodge can't cancel before the hit. `DodgeAfterHit` still works for them. `DebugLog` prints the name of each attack you cancel. |
 | `DodgeKey` | none | Dedicated dodge key. Local only. |
 | `BlockJump` | Dodge | What jump does while blocking. Local only. |
 
