@@ -11,6 +11,7 @@ Running around Valheim without snagging on every bush and log. This mod was prom
 - **Pass-through:** bushes, mushrooms, berry bushes, pickables, crops and saplings no longer block you. You can still pick, chop and hit them.
 - **Step-up:** walk up onto low obstacles (logs, rocks, ledges) without jumping or using stamina. How tall depends on how fast you move: 0.7 m walking or crouching, 1.2 m running, 1.5 m sprinting by default (`MaxHeightWalk` / `MaxHeightJog` / `MaxHeightSprint`). `DebugLog` logs why each obstacle was or wasn't stepped on.
 - **Character slide:** walking into enemies or other players slides you around them, the same way you slide around a tree.
+- **Forgiving jump:** running over bumps lifts you slightly off the ground. You can still jump then, as long as the ground is close below you. If you get hit while in the air, you can't jump until you land.
 
 Each feature can be turned off separately.
 

@@ -110,7 +110,7 @@ namespace Unhindered
             return bestDistance < float.MaxValue;
         }
 
-        private static bool Blocks(Collider collider, int selfLayer)
+        internal static bool Blocks(Collider collider, int selfLayer)
         {
             Rigidbody attached = collider.attachedRigidbody;
             return (collider.excludeLayers & selfLayer) == 0

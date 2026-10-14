@@ -2,7 +2,7 @@
   "name": "Unhindered",
   "version_number": "0.0.0",
   "website_url": "https://github.com/hvalch-mod/valheim-mods",
-  "description": "Walk through small plants, step over logs and low rocks without jumping, and slide around enemies instead of sticking to them.",
+  "description": "Smoother movement: running and jumping with less snagging on plants, rocks, logs and enemies.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2351",
     "ValheimModding-Jotunn-2.30.2"

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0
+
+- Forgiving jump: jump works when running lifts you slightly off the ground. Getting hit in the air cancels it until you land.
+
 ## 0.2.0
 
 - Character slide: walking into enemies or other players slides you around them, like trees, instead of sticking.

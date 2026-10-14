@@ -18,7 +18,7 @@ namespace Unhindered
     {
         public const string Guid = "hvalch.Unhindered";
         public const string Name = "Unhindered";
-        public const string Version = "0.2.0";
+        public const string Version = "0.3.0";
 
         internal static ManualLogSource Log;
 
@@ -41,6 +41,9 @@ namespace Unhindered
 
         // Character slide: slide around other characters instead of sticking to them.
         internal static ConfigEntry<bool> CharacterSlideEnabled;
+
+        // Forgiving jump: jump while just above the ground, not only when touching it.
+        internal static ConfigEntry<bool> ForgivingJumpEnabled;
 
         private readonly Harmony _harmony = new Harmony(Guid);
 
@@ -87,6 +90,11 @@ namespace Unhindered
             const string cs = "3 - Character Slide";
             CharacterSlideEnabled = BindSynced(cs, "Enabled", true,
                 "Slide around enemies and other players you walk into, the way you slide around trees, instead of sticking to them.");
+
+            const string fj = "4 - Forgiving Jump";
+            ForgivingJumpEnabled = BindSynced(fj, "Enabled", true,
+                "Jump when running lifts you slightly off the ground, instead of the jump being ignored. " +
+                "Getting hit in the air cancels it until you land.");
 
             // In-game config manager edits and server sync re-apply live.
             Config.SettingChanged += (_, e) =>
